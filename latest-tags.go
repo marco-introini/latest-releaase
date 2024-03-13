@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -34,18 +35,17 @@ func main() {
 }
 
 func getLatestTag(owner, repo string) {
+
+	// Crea un client GitHub
 	client := github.NewClient(nil)
 
-	opt := &github.ListOptions{Page: 1, PerPage: 1}
-	tags, _, err := client.Repositories.ListTags(_, owner, repo, opt)
+	// Ottieni l'ultima release del repository
+	release, _, err := client.Repositories.GetLatestRelease(context.Background(), owner, repo)
 	if err != nil {
-		fmt.Printf("Error getting tags for repository %s/%s: %v\n", owner, repo, err)
+		fmt.Println(err)
 		return
 	}
 
-	if len(tags) == 0 {
-		fmt.Printf("No tags found for repository %s/%s\n", owner, repo)
-	} else {
-		fmt.Printf("Latest tag for repository %s/%s: %s, created at %s\n", owner, repo, *tags[0].Name, tags[0].Commit.Author.GetDate().Format("2006-01-02"))
-	}
+	fmt.Println("REPO ", owner, repo, release.GetTagName(), release.GetPublishedAt().Format("2006-01-02"))
+
 }
