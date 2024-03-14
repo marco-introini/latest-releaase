@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -12,9 +13,23 @@ import (
 )
 
 func main() {
-	file, err := os.Open("repositories.txt")
+
+	var fileName string
+	var numDays int
+
+	flag.StringVar(&fileName, "file", "repositories.txt", "File containing repositories")
+	flag.IntVar(&numDays, "days", 10, "Number of days to look back")
+	flag.Parse()
+
+	if numDays < 0 {
+		fmt.Println("Days must be >= 0")
+		os.Exit(1)
+	}
+
+	file, err := os.Open(fileName)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	defer file.Close()
 
@@ -27,7 +42,7 @@ func main() {
 		}
 
 		owner, repository := repo[0], repo[1]
-		getLatestTag(owner, repository, 10)
+		getLatestTag(owner, repository, numDays)
 	}
 
 	if err := scanner.Err(); err != nil {
